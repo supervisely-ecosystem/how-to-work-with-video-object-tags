@@ -80,16 +80,16 @@ kiwi_new_tag_meta, _ = refresh_meta(project_meta, kiwi_object_tag_meta)
 project_objects = video_ann_json.get("objects")
 
 created_tag_ids = {}
+orange_ids = []
 for object in project_objects:
     if object["classTitle"] == "orange":
         tag_id = api.video.object.tag.add(
             orange_new_tag_meta.sly_id, object["id"], value="big", frame_range=[2, 6]
         )
         created_tag_ids[object["id"]] = tag_id
+        orange_ids.append(object["id"])
     elif object["classTitle"] == "kiwi":
         api.video.object.tag.add(kiwi_new_tag_meta.sly_id, object["id"], value="medium")
-
-orange_ids = [object["id"] for object in project_objects if object["classTitle"] == "orange"]
 
 tag_id_to_operate = created_tag_ids.get(orange_ids[0])
 
