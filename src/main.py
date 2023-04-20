@@ -11,10 +11,8 @@ project_id = sly.env.project_id()
 dataset_id = sly.env.dataset_id()
 
 video_ids = api.video.get_list(dataset_id)
-
 project_meta_json = api.project.get_meta(project_id)
 project_meta = sly.ProjectMeta.from_json(data=project_meta_json)
-
 video_ann_json = api.video.annotation.download(video_ids[0].id)
 
 
@@ -73,7 +71,7 @@ kiwi_object_tag_meta = sly.TagMeta(
     name="kiwi",
     value_type=sly.TagValueType.ONEOF_STRING,
     applicable_to=sly.TagApplicableTo.OBJECTS_ONLY,
-    possible_values=["big", "small"],
+    possible_values=["medium", "small"],
 )
 
 orange_new_tag_meta, project_meta = refresh_meta(project_meta, orange_object_tag_meta)
@@ -89,7 +87,7 @@ for object in project_objects:
         )
         created_tag_ids[object["id"]] = tag_id
     elif object["classTitle"] == "kiwi":
-        api.video.object.tag.add(kiwi_new_tag_meta.sly_id, object["id"], value="big")
+        api.video.object.tag.add(kiwi_new_tag_meta.sly_id, object["id"], value="medium")
 
 orange_ids = [object["id"] for object in project_objects if object["classTitle"] == "orange"]
 
