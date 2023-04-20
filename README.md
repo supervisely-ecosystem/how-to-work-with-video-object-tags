@@ -59,7 +59,7 @@ Project tags metadata after its initialization. This data is empty.
 
 <img width="1280" alt="tags" src="https://user-images.githubusercontent.com/57998637/233423899-7fdd1623-cdfa-4f87-b718-db9d9a6b03ae.png">
 
-Visualization in Labeling Tool before we add tags.
+Visualization in Labeling Tool before we starting add tags.
 
 <img width="1280" alt="initialization" src="https://user-images.githubusercontent.com/57998637/233423896-e7a135be-e0f0-4789-ad24-81fff40c82db.png">
 
@@ -115,7 +115,7 @@ video_ann_json = api.video.annotation.download(video_ids[0].id)
 
 ### **Define function to work with metadata**
 
-In this function described recreation of the source project metadata with new tag metadata. Right after updating the metadata, we need to obtain added metadata on the previous step to get the IDs in the next steps. If a tag with the `tag_name` already exists in the metadata, we could just use it if it fits our requirements. In case this tag doesn't meet our requirements, it would be better to create a new one with a different name. On the other hand, we could update the tag values.
+This function is used to recreate the source project metadata with new tag metadata. Right after updating the metadata, we need to obtain added metadata again work with it in the next steps. In case a tag with the `tag_name` already exists in the metadata, we could just use it if it fits our requirements. If this tag doesn't meet our requirements, it would be better to create a new one with a different name.
 
 ```python
 def refresh_meta(project_meta, new_tag_meta):
@@ -141,6 +141,8 @@ def refresh_meta(project_meta, new_tag_meta):
 
 ### **Create new tag metadata for video**
 
+Here we create video tag metadata and use function from the previous step to insert it in our project.
+
 ```python
 video_tag_meta = sly.TagMeta(
     name="fruits",
@@ -157,9 +159,9 @@ new_tag_meta, project_meta = refresh_meta(project_meta, video_tag_meta)
 
 When you pass information from tag metadata using its ID to the object, a new tag is created and appended.
 
-If you want to add a tag with value, you can define the `value` argument with possible values.
+To add a tag with value, you must define the `value` argument with possible values.
 
-If you want to add a tag to frames, you can define the `frame_range` argument.
+If you want to add a tag to frames, you must define the `frame_range` argument.
 
 ```python
 api.video.tag.add_tag(new_tag_meta.sly_id, video_ids[0].id, value=3)
@@ -173,7 +175,7 @@ Visualization in Labeling Tool with new tags.
 
 ### **Update tag value**
 
-Also, if you need to correct tag values, you can easily do so as follows:
+Also, if you need to correct tag values or frames, you can easily do so as follows:
 
 ```python
 api.video.tag.update_value(tag_id=tag_info["id"], tag_value=1)
@@ -196,6 +198,8 @@ api.video.tag.remove_from_video(tag_info["id"])
 Please note that you are only deleting the tag from the object. To remove a tag from the project (`TagMeta`), you need to use other SDK methods.
 
 ### **Create new tag metadatas for annotation objects in video**
+
+The same way as for video, but now we strictly define via `applicable_to` for which entities this tags could be added. It is not necessary and depends only on your desire to limit types other than objects.
 
 ```python
 orange_object_tag_meta = sly.TagMeta(
@@ -221,26 +225,21 @@ kiwi_new_tag_meta, _ = refresh_meta(project_meta, kiwi_object_tag_meta)
 
 ### **Create new tag for annotation object and frames with this object**
 
-When you pass information from tag metadata using its ID to the object, a new tag is created and appended.
-
-If you want to add a tag with value, you can define the `value` argument with possible values.
-
-If you want to add a tag to frames, you can define the `frame_range` argument.
+Nothing new that you haven't seen already, just added some lines to handle objects according to their classes. Collects only oranges tag ids for further processing.
 
 ```python
 project_objects = video_ann_json.get("objects")
 created_tag_ids = {}
+orange_ids = []
 for object in project_objects:
     if object["classTitle"] == "orange":
         tag_id = api.video.object.tag.add(
             orange_new_tag_meta.sly_id, object["id"], value="big", frame_range=[2, 6]
         )
         created_tag_ids[object["id"]] = tag_id
+        orange_ids.append(object["id"])
     elif object["classTitle"] == "kiwi":
         api.video.object.tag.add(kiwi_new_tag_meta.sly_id, object["id"], value="medium")
-
-orange_ids = [object["id"] for object in project_objects if object["classTitle"] == "orange"]
-
 ```
 
 Visualization in Labeling Tool with new tags.
@@ -251,7 +250,7 @@ Visualization in Labeling Tool with new tags.
 
 ### **Update tag value and frame rates for annotation object**
 
-Also, if you need to correct tag values, you can easily do so as follows:
+To correct tag values for the first orange in list, do so as follows:
 
 ```python
 tag_id_to_operate = created_tag_ids.get(orange_ids[0])
@@ -264,8 +263,6 @@ api.video.object.tag.update_frame_range(tag_id_to_operate, [3, 5])
 <img width="1280" alt="orange_changed_frames_on_video" src="https://user-images.githubusercontent.com/57998637/233423954-0d3d95ba-37ea-44c0-a39e-27a878ccb521.png">
 
 ### **Delete tag from annotation object**
-
-The same as for the video all you need is its ID.
 
 ```python
 api.video.object.tag.remove(tag_id_to_operate)
