@@ -1,12 +1,12 @@
 ---
-description: How to create, add, update and remove tags from Video and annotation objects, even for frames.
+description: How to create, add, update and remove tags from Video and its annotation objects.
 ---
 
 # **Tags on Video, its annotation objects and frames**
 
 ## **Introduction**
 
-In this tutorial, you will learn how to create new tags and assign them, update its values or remove tags for selected annotation objects or frames (with these objects) in Video using the Supervisely SDK.
+In this tutorial, you will learn how to create new tags for Video, its annotation objects or frames and assign them, update its values or remove at all using the Supervisely SDK.
 
 Supervisely supports different types of tags:
 
@@ -47,28 +47,20 @@ cd how-to-work-with-video-object-tags
 code -r .
 ```
 
-**Step 4.** Create, for example, dataset with this tutorial [Spatial labels on videos](https://developer.supervise.ly/getting-started/python-sdk-tutorials/spatial-labels-on-videos).
+**Step 4.** Create dataset, for example, using this tutorial [Spatial labels on videos](https://developer.supervise.ly/getting-started/python-sdk-tutorials/spatial-labels-on-videos).
 
-<img width="1280" src="https://user-images.githubusercontent.com/57998637/231194451-e8797293-0317-4168-a165-7bd59d5b72f3.gif">
+There you see project classes after project initialization
 
-There you see project classes after Demo initialization
-
-<img width="1280" alt="classes" src="https://user-images.githubusercontent.com/57998637/231448142-edf8b36a-1699-4633-856c-440c7789e0f7.png">
-
-Project tags metadata after Demo initialization. This data is empty.
-
-<img width="1280" alt="empty_tags" src="https://user-images.githubusercontent.com/57998637/231447574-fc4002cc-3e0e-45e0-9a3c-e8c8ccd04db8.png">
+Project tags metadata after its initialization. This data is empty.
 
 Visualization in Labeling Tool before we add tags
-
-<img width="1280" alt="initial" src="https://user-images.githubusercontent.com/57998637/232045216-93e52991-4ee4-46a8-8d06-50d47042b18f.png">
 
 **Step 5.** Change Workspace ID in `local.env` file by copying the ID from the context menu of the workspace. Do the same for Project ID and Dataset ID .
 
 ```python
 WORKSPACE_ID=82841  # ⬅️ change value
-PROJECT_ID=239385  # ⬅️ change value
-DATASET_ID=774629  # ⬅️ change value
+PROJECT_ID=240755  # ⬅️ change value
+DATASET_ID=778169  # ⬅️ change value
 ```
 
 <img  width="600" src="https://user-images.githubusercontent.com/57998637/231221251-3dfc1a56-b851-4542-be5b-d82b2ef14176.gif">
@@ -107,69 +99,49 @@ dataset_id = sly.env.dataset_id()
 By using these IDs, we can retrieve the project metadata and annotations, and define the values needed for the following operations.
 
 ```python
+video_ids = api.video.get_list(dataset_id)
 project_meta_json = api.project.get_meta(project_id)
 project_meta = sly.ProjectMeta.from_json(data=project_meta_json)
-
-key_id_map = sly.KeyIdMap()
-
-pcd_ep_ann_json = api.pointcloud_episode.annotation.download(dataset_id)
+video_ann_json = api.video.annotation.download(video_ids[0].id)
 ```
 
-### **Create new tag metadata**
+### **Define function to work with metadata**
 
-To create a new tag, you need to first define a tag metadata. This includes specifying the tag name, type, the objects to which it can be added, and the possible values. This base information will be used to create the actual tags.
-
-```python
-tag_name = "Car"
-tag_values = ["car_1", "car_2"]
-
-if not project_meta.tag_metas.has_key(tag_name):
-    new_tag_meta = sly.TagMeta(
-        tag_name,
-        sly.TagValueType.ONEOF_STRING,
-        applicable_to=sly.TagApplicableTo.OBJECTS_ONLY,
-        possible_values=tag_values,
-    )
-```
-
-Then recreate the source project metadata with new tag metadata.
+In this function described recreation of the source project metadata with new tag metadata. Right after updating the metadata, we need to obtain added metadata on the previous step to get the IDs in the next steps. If a tag with the `tag_name` already exists in the metadata, we could just use it if it fits our requirements. In case this tag doesn't meet our requirements, it would be better to create a new one with a different name. On the other hand, we could update the tag values.
 
 ```python
-    new_tags_collection = project_meta.tag_metas.add(new_tag_meta)
-    new_project_meta = sly.ProjectMeta(
-        tag_metas=new_tags_collection, obj_classes=project_meta.obj_classes
-    )
-    api.project.update_meta(project_id, new_project_meta)
-```
-
-New tag metadatas added
-
-<img width="1280" alt="tag_meta_created" src="https://user-images.githubusercontent.com/57998637/232045203-f9d16210-fc4d-48ed-a71e-33b0c45f1fab.png">
-
-Right after updating the metadata, we need to obtain added metadata on the previous step to get the IDs in the next steps.
-
-```python
-    new_prject_meta_json = api.project.get_meta(project_id)
-    new_project_meta = sly.ProjectMeta.from_json(data=new_prject_meta_json)
-    new_tag_meta = new_project_meta.tag_metas.get(new_tag_meta.name)
-```
-
-### **Or use existing tag metadata**
-
-If a tag with the `tag_name` already exists in the metadata, we could just use it if it fits our requirements.
-
-```python
-else:
-    new_tag_meta = project_meta.tag_metas.get(tag_name)
-    if sorted(new_tag_meta.possible_values) != sorted(tag_values):
-        sly.logger.warning(
-            f"Tag [{new_tag_meta.name}] already exists, but with another values: {new_tag_meta.possible_values}"
+def refresh_meta(project_meta, new_tag_meta):
+    if not project_meta.tag_metas.has_key(new_tag_meta.name):
+        new_tags_collection = project_meta.tag_metas.add(new_tag_meta)
+        project_meta = sly.ProjectMeta(
+            tag_metas=new_tags_collection, obj_classes=project_meta.obj_classes
         )
+        api.project.update_meta(project_id, project_meta)
+        new_prject_meta_json = api.project.get_meta(project_id)
+        project_meta = sly.ProjectMeta.from_json(data=new_prject_meta_json)
+        new_tag_meta = project_meta.tag_metas.get(new_tag_meta.name)
+    else:
+        tag_values = new_tag_meta.possible_values
+        new_tag_meta = project_meta.tag_metas.get(new_tag_meta.name)
+        if tag_values:
+            if sorted(new_tag_meta.possible_values) != sorted(tag_values):
+                sly.logger.warning(
+                    f"Tag [{new_tag_meta.name}] already exists, but with another values: {new_tag_meta.possible_values}"
+                )
+    return new_tag_meta, project_meta
 ```
 
-In case this tag doesn't meet our requirements, it would be better to create a new one with a different name. On the other hand, we could update the tag values.
+### **Create new tag metadata for video**
 
-### **Create new tag with value and add to objects**
+```python
+video_tag_meta = sly.TagMeta(
+    name="fruits",
+    value_type=sly.TagValueType.ANY_NUMBER,
+    applicable_to=sly.TagApplicableTo.ALL,
+)
+```
+
+### **Create new tag for video and its frames**
 
 When you pass information from tag metadata using its ID to the object, a new tag is created and appended.
 
@@ -178,69 +150,99 @@ If you want to add a tag with value, you can define the `value` argument with po
 If you want to add a tag to frames, you can define the `frame_range` argument.
 
 ```python
-project_objects = pcd_ep_ann_json.get("objects")
-tag_frames = [0, 26]
-created_tag_ids = {}
+new_tag_meta, project_meta = refresh_meta(project_meta, video_tag_meta)
 
-for object in project_objects:
-    if object["classTitle"] == "Car":
-        tag_id = api.pointcloud_episode.object.tag.add(
-            new_tag_meta.sly_id, object["id"], value="car_1", frame_range=tag_frames
-        )
-        created_tag_ids[object["id"]] = tag_id
+api.video.tag.add_tag(new_tag_meta.sly_id, video_ids[0].id, value=3)
+
+tag_info = api.video.tag.add_tag(new_tag_meta.sly_id, video_ids[0].id, value=2, frame_range=[2, 6])
 ```
-
-`created_tag_ids` uses to store IDs for the following operations.
 
 Visualization in Labeling Tool with new tags
-
-<img width="1280" alt="tad_added" src="https://user-images.githubusercontent.com/57998637/232045207-5a52b32c-c766-4219-8713-d18e7174432a.png">
-
-You could more precisely define `tag_frames` in your dataset using the following example:
-
-replace line number 46 of source code with this:
-
-```python
-project_frames = pcd_ep_ann_json.get("frames")
-```
-
-insert on line number 51 of source code this:
-
-```python
-        frame_range = []
-        for frame in project_frames:
-            for figure in frame["figures"]:
-                if figure["objectId"] == object["id"]:
-                    frame_range.append(frame["index"])
-        frame_range = frame_range[0:1] + frame_range[-1:]
-```
-
-You will most likely need to modify this example to more accurately define the objects. It is only provided to make it faster and easier to understand where and with what information to interact.
 
 ### **Update tag value**
 
 Also, if you need to correct tag values, you can easily do so as follows:
 
 ```python
-tag_id_to_operate = created_tag_ids.get(project_objects[0]["id"])
+api.video.tag.update_value(tag_id=tag_info["id"], tag_value=1)
 
-api.pointcloud_episode.object.tag.update(tag_id_to_operate, "car_2")
+api.video.tag.update_frame_range(tag_info["id"], [3, 5])
 ```
-
-In our example, we took the first annotated object and the tag assigned to it in the previous step.
-
-You can use a different approach to obtain information about objects, their tags, and the values of those tags according to your goal.
-
-<img width="1280" alt="tag_updated" src="https://user-images.githubusercontent.com/57998637/232045213-477829d1-f9ee-4a39-9551-931bc9034111.png">
 
 ### **Delete tag**
 
 To remove a tag, all you need is its ID.
 
 ```python
-api.pointcloud_episode.object.tag.remove(tag_id_to_operate)
+api.video.tag.remove_from_video(tag_info["id"])
 ```
 
-<img width="1280" alt="tagg_removed" src="https://user-images.githubusercontent.com/57998637/232045214-17174d7b-f84b-433e-ae88-1930eedb451b.png">
-
 Please note that you are only deleting the tag from the object. To remove a tag from the project (`TagMeta`), you need to use other SDK methods.
+
+### **Create new tag metadatas for annotation objects in video**
+
+```python
+orange_object_tag_meta = sly.TagMeta(
+    name="orange",
+    value_type=sly.TagValueType.ONEOF_STRING,
+    applicable_to=sly.TagApplicableTo.OBJECTS_ONLY,
+    possible_values=["small", "big"],
+)
+
+kiwi_object_tag_meta = sly.TagMeta(
+    name="kiwi",
+    value_type=sly.TagValueType.ONEOF_STRING,
+    applicable_to=sly.TagApplicableTo.OBJECTS_ONLY,
+    possible_values=["medium", "small"],
+)
+
+orange_new_tag_meta, project_meta = refresh_meta(project_meta, orange_object_tag_meta)
+
+kiwi_new_tag_meta, _ = refresh_meta(project_meta, kiwi_object_tag_meta)
+```
+
+### **Create new tag for annotation object and frames with this object**
+
+When you pass information from tag metadata using its ID to the object, a new tag is created and appended.
+
+If you want to add a tag with value, you can define the `value` argument with possible values.
+
+If you want to add a tag to frames, you can define the `frame_range` argument.
+
+```python
+project_objects = video_ann_json.get("objects")
+created_tag_ids = {}
+for object in project_objects:
+    if object["classTitle"] == "orange":
+        tag_id = api.video.object.tag.add(
+            orange_new_tag_meta.sly_id, object["id"], value="big", frame_range=[2, 6]
+        )
+        created_tag_ids[object["id"]] = tag_id
+    elif object["classTitle"] == "kiwi":
+        api.video.object.tag.add(kiwi_new_tag_meta.sly_id, object["id"], value="medium")
+
+orange_ids = [object["id"] for object in project_objects if object["classTitle"] == "orange"]
+
+```
+
+Visualization in Labeling Tool with new tags
+
+### **Update tag value and frame rates for annotation object**
+
+Also, if you need to correct tag values, you can easily do so as follows:
+
+```python
+tag_id_to_operate = created_tag_ids.get(orange_ids[0])
+
+api.video.object.tag.update_value(tag_id_to_operate, "small")
+
+api.video.object.tag.update_frame_range(tag_id_to_operate, [3, 5])
+```
+
+### **Delete tag from annotation object**
+
+The same as for the video all you need is its ID.
+
+```python
+api.video.object.tag.remove(tag_id_to_operate)
+```
