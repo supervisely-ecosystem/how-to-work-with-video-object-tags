@@ -115,7 +115,7 @@ video_ann_json = api.video.annotation.download(video_ids[0].id)
 
 ### **Define function to work with metadata**
 
-This function is used to recreate the source project metadata with new tag metadata. Right after updating the metadata, we need to obtain added metadata again work with it in the next steps. In case a tag with the `tag_name` already exists in the metadata, we could just use it if it fits our requirements. If this tag doesn't meet our requirements, it would be better to create a new one with a different name.
+This function is used to recreate the source project metadata with new tag metadata. Right after updating the metadata, we need to obtain added metadata again to work with it in the next steps. In case a tag with the `tag_name` already exists in the metadata, we could just use it if it fits our requirements. If this tag doesn't meet our requirements, it would be better to create a new one with a different name.
 
 ```python
 def refresh_meta(project_meta, new_tag_meta):
@@ -141,7 +141,7 @@ def refresh_meta(project_meta, new_tag_meta):
 
 ### **Create new tag metadata for video**
 
-Here we create video tag metadata and use function from the previous step to insert it in our project.
+Here, we are creating metadata for a video tag and using the function from the previous step to insert it into our project.
 
 ```python
 video_tag_meta = sly.TagMeta(
@@ -199,7 +199,7 @@ Please note that you are only deleting the tag from the object. To remove a tag 
 
 ### **Create new tag metadatas for annotation objects in video**
 
-The same way as for video, but now we strictly define via `applicable_to` for which entities this tags could be added. It is not necessary and depends only on your desire to limit types other than objects.
+The process is the same as for video, but now we strictly define the `applicable_to` parameter to specify which entities these tags can be added to. It is not necessary and depends solely on your desire to limit the types other than objects.
 
 ```python
 orange_object_tag_meta = sly.TagMeta(
@@ -225,7 +225,7 @@ kiwi_new_tag_meta, _ = refresh_meta(project_meta, kiwi_object_tag_meta)
 
 ### **Create new tag for annotation object and frames with this object**
 
-Nothing new that you haven't seen already, just added some lines to handle objects according to their classes. Collects only oranges tag ids for further processing.
+There's nothing new that you haven't seen already, just added some lines to handle objects according to their classes. Collects only oranges tag ids for further processing.
 
 ```python
 project_objects = video_ann_json.get("objects")
