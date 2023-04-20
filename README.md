@@ -75,7 +75,7 @@ DATASET_ID=778169  # ⬅️ change value
 
 **Step 6.** Start debugging `src/main.py`
 
-<img width="1280" src="https://user-images.githubusercontent.com/57998637/233423900-cc7fb22c-f6e3-48db-bfcb-372fa7806ede.gif">
+<img width="1280" src="https://user-images.githubusercontent.com/57998637/233428278-92e535d0-63c8-44af-9351-e3aed25d600f.gif">
 
 ## **Python Code**
 
@@ -147,7 +147,11 @@ video_tag_meta = sly.TagMeta(
     value_type=sly.TagValueType.ANY_NUMBER,
     applicable_to=sly.TagApplicableTo.ALL,
 )
+
+new_tag_meta, project_meta = refresh_meta(project_meta, video_tag_meta)
 ```
+
+<img width="1280" alt="fruits_tagmeta_added" src="https://user-images.githubusercontent.com/57998637/233423908-c752b92c-d952-4126-9ce1-bc43473dc1db.png">
 
 ### **Create new tag for video and its frames**
 
@@ -158,14 +162,14 @@ If you want to add a tag with value, you can define the `value` argument with po
 If you want to add a tag to frames, you can define the `frame_range` argument.
 
 ```python
-new_tag_meta, project_meta = refresh_meta(project_meta, video_tag_meta)
-
 api.video.tag.add_tag(new_tag_meta.sly_id, video_ids[0].id, value=3)
 
 tag_info = api.video.tag.add_tag(new_tag_meta.sly_id, video_ids[0].id, value=2, frame_range=[2, 6])
 ```
 
-Visualization in Labeling Tool with new tags
+Visualization in Labeling Tool with new tags.
+
+<img width="1280" alt="fruits_added_to_video" src="https://user-images.githubusercontent.com/57998637/233423915-38f84b04-46ef-43a5-84de-09272010e1c5.png">
 
 ### **Update tag value**
 
@@ -177,6 +181,8 @@ api.video.tag.update_value(tag_id=tag_info["id"], tag_value=1)
 api.video.tag.update_frame_range(tag_info["id"], [3, 5])
 ```
 
+<img width="1280" alt="fruits_changed_frames_on_video" src="https://user-images.githubusercontent.com/57998637/233423925-c0e4831b-d199-4e65-9bf9-3c932627b28b.png">
+
 ### **Delete tag**
 
 To remove a tag, all you need is its ID.
@@ -184,6 +190,8 @@ To remove a tag, all you need is its ID.
 ```python
 api.video.tag.remove_from_video(tag_info["id"])
 ```
+
+<img width="1280" alt="fruits_removed_from_video" src="https://user-images.githubusercontent.com/57998637/233423950-aac3e50c-aac2-45ce-9593-e8a7addd7904.png">
 
 Please note that you are only deleting the tag from the object. To remove a tag from the project (`TagMeta`), you need to use other SDK methods.
 
@@ -209,6 +217,8 @@ orange_new_tag_meta, project_meta = refresh_meta(project_meta, orange_object_tag
 kiwi_new_tag_meta, _ = refresh_meta(project_meta, kiwi_object_tag_meta)
 ```
 
+<img width="1280" alt="orange_kiwi_tagmeta_added" src="https://user-images.githubusercontent.com/57998637/233423928-13e9bf7c-dcc9-4e9f-a3d1-a78b730e65b6.png">
+
 ### **Create new tag for annotation object and frames with this object**
 
 When you pass information from tag metadata using its ID to the object, a new tag is created and appended.
@@ -233,7 +243,11 @@ orange_ids = [object["id"] for object in project_objects if object["classTitle"]
 
 ```
 
-Visualization in Labeling Tool with new tags
+Visualization in Labeling Tool with new tags.
+
+<img width="1280" alt="kiwi_added_to_video" src="https://user-images.githubusercontent.com/57998637/233423937-53eb1613-60a4-4d99-879a-65f24d31349b.png">
+
+<img width="1280" alt="orange_added_to_video" src="https://user-images.githubusercontent.com/57998637/233423933-ec253703-0fd0-4d2c-9137-2e53660562af.png">
 
 ### **Update tag value and frame rates for annotation object**
 
@@ -247,6 +261,8 @@ api.video.object.tag.update_value(tag_id_to_operate, "small")
 api.video.object.tag.update_frame_range(tag_id_to_operate, [3, 5])
 ```
 
+<img width="1280" alt="orange_changed_frames_on_video" src="https://user-images.githubusercontent.com/57998637/233423954-0d3d95ba-37ea-44c0-a39e-27a878ccb521.png">
+
 ### **Delete tag from annotation object**
 
 The same as for the video all you need is its ID.
@@ -254,3 +270,5 @@ The same as for the video all you need is its ID.
 ```python
 api.video.object.tag.remove(tag_id_to_operate)
 ```
+
+<img width="1280" alt="orange_removed_from_video" src="https://user-images.githubusercontent.com/57998637/233423946-deebe0f9-5964-4a93-bd2b-ee636c43aa7a.png">
