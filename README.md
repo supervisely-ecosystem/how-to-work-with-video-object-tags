@@ -47,13 +47,21 @@ cd how-to-work-with-video-object-tags
 code -r .
 ```
 
-**Step 4.** Create dataset, for example, using this tutorial [Spatial labels on videos](https://developer.supervise.ly/getting-started/python-sdk-tutorials/spatial-labels-on-videos).
+**Step 4.** Create video project, for example, using this tutorial [Spatial labels on videos](https://developer.supervise.ly/getting-started/python-sdk-tutorials/spatial-labels-on-videos).
 
-There you see project classes after project initialization
+<img width="1280" alt="Demo" src="https://user-images.githubusercontent.com/57998637/233423889-2078ec0c-723b-4771-b2e0-7203a30f26a7.png">
+
+There you see project classes after project initialization.
+
+<img width="1280" alt="classes" src="https://user-images.githubusercontent.com/57998637/233423961-23909d31-6852-4fb6-aece-d47d6f0c1dd3.png">
 
 Project tags metadata after its initialization. This data is empty.
 
-Visualization in Labeling Tool before we add tags
+<img width="1280" alt="tags" src="https://user-images.githubusercontent.com/57998637/233423899-7fdd1623-cdfa-4f87-b718-db9d9a6b03ae.png">
+
+Visualization in Labeling Tool before we add tags.
+
+<img width="1280" alt="initialization" src="https://user-images.githubusercontent.com/57998637/233423896-e7a135be-e0f0-4789-ad24-81fff40c82db.png">
 
 **Step 5.** Change Workspace ID in `local.env` file by copying the ID from the context menu of the workspace. Do the same for Project ID and Dataset ID .
 
@@ -67,7 +75,7 @@ DATASET_ID=778169  # ⬅️ change value
 
 **Step 6.** Start debugging `src/main.py`
 
-<img width="1280" src="https://user-images.githubusercontent.com/57998637/232045498-33bf1d2a-eb07-40c1-8319-9b2197e92c1a.gif">
+<img width="1280" src="https://user-images.githubusercontent.com/57998637/233423900-cc7fb22c-f6e3-48db-bfcb-372fa7806ede.gif">
 
 ## **Python Code**
 
