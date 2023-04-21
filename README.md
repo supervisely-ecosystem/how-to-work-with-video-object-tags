@@ -173,7 +173,7 @@ Visualization in Labeling Tool with new tags.
 
 <img width="1280" alt="fruits_added_to_video" src="https://user-images.githubusercontent.com/57998637/233423915-38f84b04-46ef-43a5-84de-09272010e1c5.png">
 
-### **Update tag value**
+### **Update tag value and frame range for video **
 
 Also, if you need to correct tag values or frames, you can easily do so as follows:
 
@@ -248,7 +248,7 @@ Visualization in Labeling Tool with new tags.
 
 <img width="1280" alt="orange_added_to_video" src="https://user-images.githubusercontent.com/57998637/233423933-ec253703-0fd0-4d2c-9137-2e53660562af.png">
 
-### **Update tag value and frame rates for object**
+### **Update tag value and frame range for object**
 
 To correct tag values for the first orange in list, do so as follows:
 
